@@ -7,35 +7,30 @@ from evdev.ecodes import keys, KEY, SYN, REL, ABS, EV_KEY, EV_REL, EV_ABS, EV_SY
 print("Devices:")
 allDevices = [evdev.InputDevice(path) for path in evdev.list_devices()]
 
+deviceCodes = [] # [7] 
+
+devicePaths = [] # ["/by-path/platform-i8042-serio-0-event-kbd"] + [f"event{code}" for code in deviceCodes] # laptop only
+devicePaths = [f"/dev/input/{path}" for path in devicePaths]
+
 for device in allDevices:
     print(device.path, device.name, device.phys)
 
-# devices = []
-# for device in allDevices:
-#     devices.append(evdev.InputDevice(device.path))
+    if "KMonad" in device.name:
+        devicePaths.append(device.path)
+
+devices = [evdev.InputDevice(path) for path in devicePaths]
 
 print("\nEvents:")
-# deviceCodes = [10, 20] # both keyboards
-deviceCodes = [7] 
-devicePaths = ["/by-path/platform-i8042-serio-0-event-kbd"] + [f"event{code}" for code in deviceCodes] # laptop only
-devices = [evdev.InputDevice(f"/dev/input/{path}") for path in devicePaths]
-
-# keyState = {}
-# 
-# previous = None
-# 
-# chordMax = 1/100 # ms
-# currentChord = []
-# 
-# 
-# for device in devices:
-#     device.grab()
+print(f"Working with {len(devices)} devices")
 
 ec = evdev.ecodes
-blacklisted = [ec.KEY_LEFTSHIFT]
+blacklisted = [ec.KEY_LEFTSHIFT, ec.KEY_LEFTCTRL]
 basicRemaps = [
-    dict(from_ = [ec.KEY_D, ec.KEY_S], to = [ec.KEY_LEFTSHIFT]),
-    dict(from_ = [ec.KEY_L, ec.KEY_K], to = [ec.KEY_RIGHTSHIFT])
+    dict(from_ = [ec.KEY_S, ec.KEY_D], to = [ec.KEY_LEFTSHIFT]),
+    dict(from_ = [ec.KEY_K, ec.KEY_L], to = [ec.KEY_RIGHTSHIFT]),
+
+    dict(from_ = [ec.KEY_S, ec.KEY_F], to = [ec.KEY_LEFTCTRL]),
+    dict(from_ = [ec.KEY_J, ec.KEY_L], to = [ec.KEY_RIGHTCTRL]),
 ]
 
 def mapChord(chord):
@@ -55,8 +50,11 @@ def mapChord(chord):
 
     return None # default to the unsorted chord
 
+def msToSeconds(ms):
+    return ms/1000
+
 class DeviceManager:
-    delay = 1/30 # in seconds
+    delay = msToSeconds(30) # in seconds
 
     def __init__(self, device, ui = None):
         self.device = device
