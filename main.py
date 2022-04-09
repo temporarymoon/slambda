@@ -1,50 +1,66 @@
-import evdev, asyncio
+#!/usr/bin/env python3
+import evdev # for listening to keyboard events
+import asyncio # for async stuff
+import sys # for getting commnad line arguments
+import json # for json parsing
+
 from enum import Enum, IntEnum
 from evdev.events import InputEvent, KeyEvent, SynEvent
 from evdev.ecodes import keys, KEY, SYN, REL, ABS, EV_KEY, EV_REL, EV_ABS, EV_SYN, KEY_A, KEY_J, KEY_P
 
+config = sys.argv[1]
+
+f = open(config, "r")
+fileContents = f.read()
+config = json.loads(fileContents)
+
 # List all devices
-print("Devices:")
 allDevices = [evdev.InputDevice(path) for path in evdev.list_devices()]
 
-deviceCodes = [] # [7] 
+if not isinstance(config["debug"], list):
+    config["debug"] = []
 
-devicePaths = [] # ["/by-path/platform-i8042-serio-0-event-kbd"] + [f"event{code}" for code in deviceCodes] # laptop only
-devicePaths = [f"/dev/input/{path}" for path in devicePaths]
+logEvents = "logStuff" in config["debug"]
+
+if "listDevices" in config["debug"]:
+    print("Devices:")
+    for device in allDevices:
+        print(device.path, device.name, device.phys)
+
+def somePaths(prefix):
+    return [path[(len(prefix) + 1):] for path in config["inputs"] if path.startswith(f"{prefix}:")]
+
+inputPaths = somePaths("path")
+inputNames = somePaths("name") 
+
+devices = []
 
 for device in allDevices:
-    print(device.path, device.name, device.phys)
-
-    if "KMonad" in device.name:
-        devicePaths.append(device.path)
-
-devices = [evdev.InputDevice(path) for path in devicePaths]
+    if device.path in inputPaths or device.name in inputNames:
+        devices.append(device)
 
 print("\nEvents:")
 print(f"Working with {len(devices)} devices")
 
 ec = evdev.ecodes
-blacklisted = [ec.KEY_LEFTSHIFT, ec.KEY_LEFTCTRL]
-basicRemaps = [
-    dict(from_ = [ec.KEY_S, ec.KEY_D], to = [ec.KEY_LEFTSHIFT]),
-    dict(from_ = [ec.KEY_K, ec.KEY_L], to = [ec.KEY_RIGHTSHIFT]),
+blacklisted = []
 
-    dict(from_ = [ec.KEY_S, ec.KEY_F], to = [ec.KEY_LEFTCTRL]),
-    dict(from_ = [ec.KEY_J, ec.KEY_L], to = [ec.KEY_RIGHTCTRL]),
-]
+def keyCode(name):
+    return evdev.ecodes.ecodes[f"KEY_{name.upper()}"]
+
+for combo in config["combos"]:
+    combo["from"] = [keyCode(key) for key in combo["from"]]
+    combo["to"] = [keyCode(key) for key in combo["to"]]
 
 def mapChord(chord):
-    if len(chord) <= 1:
-        return
-
-    print(*[event.keycode for event in chord])
-
     codes = [keyEvent.event.code for keyEvent in chord]
 
-    for remap in basicRemaps:
-        if not all(code in codes for code in remap["from_"]):
+    for remap in config["combos"]:
+        if not all(code in codes for code in remap["from"]):
             continue
-        return remap["to"] + [code for code in codes if code not in remap["from_"]]
+
+        if len(codes) == len(remap["from"]): # or not remap["exact"]:
+            return [key for key in remap["to"]] + [code for code in codes if code not in remap["from"]]
 
     print("No mapping found")
 
@@ -67,12 +83,15 @@ class DeviceManager:
             self.device.grab()
 
     def writeUi(self, type, code, value, fallback = None):
-        if self.ui == None: 
-            return print(
-                self.device.path, 
+        if logEvents or self.ui == None: 
+            print(
+                "OUTPUT",
                 fallback if fallback != None else f"Type: {type}, Code: {code}, value: {value}", 
                 sep = ": "
             )
+
+        if self.ui == None: 
+            return
 
         self.ui.write(type, code, value)
         self.ui.syn()
@@ -125,6 +144,9 @@ class DeviceManager:
         categorized = evdev.categorize(event)
         # print(self.device.path, categorized, sep=': ')
 
+        if logEvents:
+            print("INPUT", categorized, sep = ": ")
+
         if categorized.keystate == KeyEvent.key_down:
             if self.taskEndChord != None:
                 self.taskEndChord.cancel()
@@ -148,6 +170,16 @@ class DeviceManager:
                             self.sendKey(key, 0)
                     break
             else:
+                if self.taskEndChord != None:
+                    keyDownEvent = None
+                    for key in self.currentChord:
+                        if key.event.code == event.code:
+                            keyDownEvent = key
+
+                    if keyDownEvent != None:
+                        self.sendEvent(keyDownEvent)
+                        self.currentChord.remove(keyDownEvent)
+
                 self.sendEvent(categorized)
         elif categorized.keystate == KeyEvent.key_hold:
             print("Holding has not yet been implemented!")

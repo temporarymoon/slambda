@@ -1,0 +1,27 @@
+{
+  "name": "yo",
+  "inputs": ["name:My KMonad output"],
+  "debug": ["listDevices", "logStuff"],
+  "combos": [
+    {
+      "from": ["s", "d"],
+      "to": ["leftshift"]
+    },
+    {
+      "from": ["k", "l"],
+      "to": ["rightshift"]
+    },
+    {
+      "from": ["s", "f"],
+      "to": ["leftctrl"]
+    },
+    {
+      "from": ["j", "l"],
+      "to": ["rightctrl"]
+    },
+    {
+      "from": ["q", "w"],
+      "to": ["esc"]
+    }
+  ]
+}
