@@ -20,8 +20,24 @@
       "to": ["rightctrl"]
     },
     {
+      "from": ["j", "k", "l"],
+      "to": ["rightctrl", "rightshift"]
+    },
+    {
+      "from": ["s", "d", "f"],
+      "to": ["leftctrl", "leftshift"]
+    },
+    {
       "from": ["q", "w"],
       "to": ["esc"]
+    },
+    {
+      "from": ["v", "i"],
+      "to": ["leftmeta", "v"]
+    },
+    {
+      "from": ["g", "h"],
+      "to": ["backspace"]
     }
   ]
 }

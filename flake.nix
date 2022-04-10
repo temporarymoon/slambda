@@ -23,8 +23,8 @@
             unpackPhase = "true";
             installPhase = ''
               mkdir -p $out/bin
-              cp ${./main.py} $out/bin/main
-              chmod +x $out/bin/main
+              cp ${./main.py} $out/bin/qkm
+              chmod +x $out/bin/qkm
             '';
           });
         in

@@ -172,13 +172,17 @@ class DeviceManager:
             else:
                 if self.taskEndChord != None:
                     keyDownEvent = None
+
                     for key in self.currentChord:
                         if key.event.code == event.code:
                             keyDownEvent = key
 
                     if keyDownEvent != None:
-                        self.sendEvent(keyDownEvent)
-                        self.currentChord.remove(keyDownEvent)
+                        for key in [x for x in self.currentChord]:
+                            self.sendEvent(key)
+                            self.currentChord.remove(key)
+                            if key == keyDownEvent:
+                                break
 
                 self.sendEvent(categorized)
         elif categorized.keystate == KeyEvent.key_hold:
