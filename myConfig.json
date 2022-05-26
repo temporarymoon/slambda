@@ -38,6 +38,38 @@
     {
       "from": ["g", "h"],
       "to": ["backspace"]
+    },
+    {
+      "from": ["backspace"],
+      "to": []
+    },
+    {
+      "from": ["d", "e"],
+      "to": ["rightctrl", "delete"]
+    },
+    {
+      "from": ["n", "l", "q"],
+      "to": ["leftmeta", "1"]
+    },
+    {
+      "from": ["n", "l", "w"],
+      "to": ["leftmeta", "2"]
+    },
+    {
+      "from": ["n", "l", "e"],
+      "to": ["leftmeta", "3"]
+    },
+    {
+      "from": ["n", "l", "r"],
+      "to": ["leftmeta", "4"]
+    },
+    {
+      "from": ["n", "k", "l"],
+      "to": ["leftmeta", "p"]
+    },
+    {
+      "from": ["n", "l"],
+      "to": ["leftmeta"]
     }
   ]
 }

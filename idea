@@ -1,0 +1,9 @@
+mylayer
+  esc something something
+  something else else
+
+handle
+| @500 "j" "k" "l" => something
+| @300 "j" "k" *r => while-pressed shift r
+| "caps" "a" => unicode "ɑ"
+| *r => layer *r
