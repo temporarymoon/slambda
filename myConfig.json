@@ -12,6 +12,14 @@
       "to": ["rightshift"]
     },
     {
+      "from": ["a", "n", "l"],
+      "to": ["rightctrl", "a", "n"]
+    },
+    {
+      "from": ["a", "j", "l"],
+      "to": ["rightctrl", "a"]
+    },
+    {
       "from": ["s", "f"],
       "to": ["leftctrl"]
     },
@@ -66,6 +74,10 @@
     {
       "from": ["n", "k", "l"],
       "to": ["leftmeta", "p"]
+    },
+    {
+      "from": ["leftmeta"],
+      "to": []
     },
     {
       "from": ["n", "l"],

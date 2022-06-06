@@ -7,3 +7,5 @@ handle
 | @300 "j" "k" *r => while-pressed shift r
 | "caps" "a" => unicode "ɑ"
 | *r => layer *r
+
+ℤ
