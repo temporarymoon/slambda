@@ -25,7 +25,7 @@ logEvents = "logStuff" in config["debug"]
 if "listDevices" in config["debug"]:
     print("Devices:")
     for device in allDevices:
-        print(device.path, device.name, device.phys)
+        print(f"{device.path}, {device.name}, {device.phys}")
 
 def somePaths(prefix):
     return [path[(len(prefix) + 1):] for path in config["inputs"] if path.startswith(f"{prefix}:")]

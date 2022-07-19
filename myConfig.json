@@ -1,6 +1,6 @@
 {
   "name": "yo",
-  "inputs": ["name:My KMonad output"],
+  "inputs": ["name:My KMonad output", "name:Keychron Keychron K6"],
   "debug": ["listDevices", "logStuff"],
   "combos": [
     {
@@ -82,6 +82,10 @@
     {
       "from": ["n", "l"],
       "to": ["leftmeta"]
+    },
+    {
+      "from": ["n", "v"],
+      "to": ["backslash"]
     }
   ]
 }
