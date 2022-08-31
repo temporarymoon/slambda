@@ -199,13 +199,9 @@ class DeviceManager:
                     loop.stop()
 
                 return
-managers = []
-ui = evdev.UInput(name = "My python uinput!")
 
-for device in devices:
-    manager = DeviceManager(device, ui = ui)
-    managers.append(manager)
-    asyncio.ensure_future(manager.startLoop())
+ui = evdev.UInput(name = "My python uinput!")
+loop = asyncio.get_event_loop()
 
 def custom_exception_handler(loop, context):
     # first, handle with default handler
@@ -216,10 +212,15 @@ def custom_exception_handler(loop, context):
     print(context)
     loop.stop()
 
-loop = asyncio.get_event_loop()
+managers = []
 
-for manager in managers:
+for device in devices:
+    manager = DeviceManager(device, ui = ui)
     manager.loop = loop
+    managers.append(manager)
+
+startLoops = [manager.startLoop() for manager in managers]
+asyncio.ensure_future(asyncio.gather(*startLoops))
 
 loop.set_exception_handler(custom_exception_handler)
 loop.run_forever()
