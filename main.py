@@ -9,6 +9,7 @@ from evdev.events import InputEvent, KeyEvent, SynEvent
 from evdev.ecodes import keys, KEY, SYN, REL, ABS, EV_KEY, EV_REL, EV_ABS, EV_SYN, KEY_A, KEY_J, KEY_P
 
 config = sys.argv[1]
+device_index = int(sys.argv[2])
 
 f = open(config, "r")
 fileContents = f.read()
@@ -27,16 +28,18 @@ if "listDevices" in config["debug"]:
     for device in allDevices:
         print(f"{device.path}, {device.name}, {device.phys}")
 
-def somePaths(prefix):
-    return [path[(len(prefix) + 1):] for path in config["inputs"] if path.startswith(f"{prefix}:")]
+def stripPrefix(prefix, path):
+    return path[(len(prefix) + 1):]  if path.startswith(f"{prefix}:") else None
+print(f"Working with device at index {device_index}")
 
-inputPaths = somePaths("path")
-inputNames = somePaths("name") 
+device_path = config["inputs"][device_index]
+inputPath = stripPrefix("path", device_path)
+inputName = stripPrefix("name", device_path) 
 
 devices = []
 
 for device in allDevices:
-    if device.path in inputPaths or device.name in inputNames:
+    if device.path == inputPath or device.name == inputName:
         devices.append(device)
 
 print("\nEvents:")
