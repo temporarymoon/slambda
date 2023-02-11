@@ -1,91 +1,310 @@
 {
   "name": "yo",
-  "inputs": ["name:Keychron Keychron K6", "name:My KMonad output"],
-  "debug": ["listDevices", "logStuff"],
+  "inputs": [
+    "name:Keychron Keychron K6",
+    "name:My KMonad output",
+    "name:AT Translated Set 2 keyboard"
+  ],
+  "debug": [
+    "listDevices",
+    "logStuff"
+  ],
   "combos": [
     {
-      "from": ["s", "d"],
-      "to": ["leftshift"]
+      "from": [
+        "s",
+        "d"
+      ],
+      "to": [
+        "leftshift"
+      ]
     },
     {
-      "from": ["k", "l"],
-      "to": ["rightshift"]
+      "from": [
+        "k",
+        "l"
+      ],
+      "to": [
+        "rightshift"
+      ]
     },
     {
-      "from": ["a", "n", "l"],
-      "to": ["rightctrl", "a", "n"]
+      "from": [
+        "a",
+        "n",
+        "k",
+        "l"
+      ],
+      "to": [
+        "rightctrl",
+        "a",
+        "n"
+      ]
     },
     {
-      "from": ["a", "j", "l"],
-      "to": ["rightctrl", "a"]
+      "from": [
+        "a",
+        "j",
+        "l"
+      ],
+      "to": [
+        "rightctrl",
+        "a"
+      ]
     },
     {
-      "from": ["s", "f"],
-      "to": ["leftctrl"]
+      "from": [
+        "s",
+        "f"
+      ],
+      "to": [
+        "leftctrl"
+      ]
     },
     {
-      "from": ["j", "l"],
-      "to": ["rightctrl"]
+      "from": [
+        "j",
+        "l"
+      ],
+      "to": [
+        "rightctrl"
+      ]
     },
     {
-      "from": ["j", "k", "l"],
-      "to": ["rightctrl", "rightshift"]
+      "from": [
+        "j",
+        "k",
+        "l"
+      ],
+      "to": [
+        "rightctrl",
+        "rightshift"
+      ]
     },
     {
-      "from": ["s", "d", "f"],
-      "to": ["leftctrl", "leftshift"]
+      "from": [
+        "s",
+        "d",
+        "f"
+      ],
+      "to": [
+        "leftctrl",
+        "leftshift"
+      ]
     },
     {
-      "from": ["q", "w"],
-      "to": ["esc"]
+      "from": [
+        "g",
+        "h"
+      ],
+      "to": [
+        "backspace"
+      ]
     },
     {
-      "from": ["g", "h"],
-      "to": ["backspace"]
-    },
-    {
-      "from": ["backspace"],
+      "from": [
+        "backspace"
+      ],
       "to": []
     },
     {
-      "from": ["d", "e"],
-      "to": ["rightctrl", "delete"]
-    },
-    {
-      "from": ["n", "l", "q"],
-      "to": ["leftmeta", "1"]
-    },
-    {
-      "from": ["n", "l", "w"],
-      "to": ["leftmeta", "2"]
-    },
-    {
-      "from": ["n", "l", "e"],
-      "to": ["leftmeta", "3"]
-    },
-    {
-      "from": ["n", "l", "r"],
-      "to": ["leftmeta", "4"]
-    },
-    {
-      "from": ["n", "k", "l"],
-      "to": ["leftmeta", "p"]
-    },
-    {
-      "from": ["leftmeta"],
+      "from": [
+        "enter"
+      ],
       "to": []
     },
     {
-      "from": ["n", "l"],
-      "to": ["leftmeta"]
+      "from": [
+        "tab"
+      ],
+      "to": []
     },
     {
-      "from": ["n", "v"],
-      "to": ["backslash"]
+      "from": [
+        "d",
+        "e"
+      ],
+      "to": [
+        "rightctrl",
+        "delete"
+      ]
     },
     {
-      "from": ["s", "v"],
-      "to": ["tab"]
+      "from": [
+        "n",
+        "l",
+        "q"
+      ],
+      "to": [
+        "leftmeta",
+        "1"
+      ]
+    },
+    {
+      "from": [
+        "n",
+        "l",
+        "w"
+      ],
+      "to": [
+        "leftmeta",
+        "2"
+      ]
+    },
+    {
+      "from": [
+        "n",
+        "l",
+        "e"
+      ],
+      "to": [
+        "leftmeta",
+        "3"
+      ]
+    },
+    {
+      "from": [
+        "n",
+        "l",
+        "r"
+      ],
+      "to": [
+        "leftmeta",
+        "4"
+      ]
+    },
+    {
+      "from": [
+        "n",
+        "l",
+        "a"
+      ],
+      "to": [
+        "leftmeta",
+        "5"
+      ]
+    },
+    {
+      "from": [
+        "n",
+        "l",
+        "s"
+      ],
+      "to": [
+        "leftmeta",
+        "6"
+      ]
+    },
+    {
+      "from": [
+        "n",
+        "l",
+        "d"
+      ],
+      "to": [
+        "leftmeta",
+        "7"
+      ]
+    },
+    {
+      "from": [
+        "n",
+        "l",
+        "f"
+      ],
+      "to": [
+        "leftmeta",
+        "8"
+      ]
+    },
+    {
+      "from": [
+        "n",
+        "k",
+        "l"
+      ],
+      "to": [
+        "leftmeta",
+        "p"
+      ]
+    },
+    {
+      "from": [
+        "leftmeta"
+      ],
+      "to": []
+    },
+    {
+      "from": [
+        "n",
+        "l"
+      ],
+      "to": [
+        "leftmeta"
+      ]
+    },
+    {
+      "from": [
+        "n",
+        "v"
+      ],
+      "to": [
+        "backslash"
+      ]
+    },
+    {
+      "from": [
+        "d",
+        "f"
+      ],
+      "to": [
+        "tab"
+      ]
+    },
+    {
+      "from": [
+        "e",
+        "f"
+      ],
+      "to": [
+        "enter"
+      ]
+    },
+    {
+      "from": [
+        "q",
+        "w"
+      ],
+      "to": [
+        "esc"
+      ]
+    },
+    {
+      "from": [
+        "j",
+        "k"
+      ],
+      "to": [
+        "f10"
+      ]
+    },
+    {
+      "from": [
+        "c",
+        "p"
+      ],
+      "to": [
+        "f11"
+      ]
+    },
+    {
+      "from": [
+        "j",
+        "i"
+      ],
+      "to": [
+        "f12"
+      ]
     }
   ]
 }

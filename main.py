@@ -73,7 +73,7 @@ def msToSeconds(ms):
     return ms/1000
 
 class DeviceManager:
-    delay = msToSeconds(30) # in seconds
+    delay = msToSeconds(25) # in seconds
 
     def __init__(self, device, ui = None):
         self.device = device

@@ -15,18 +15,19 @@
               evdev
             ]);
 
-          qkmDerivation = ({ pythonEnv, ... }: pkgs.stdenv.mkDerivation {
-            name = "qkm";
-            buildInputs = [
-              pythonEnv
-            ];
-            unpackPhase = "true";
-            installPhase = ''
-              mkdir -p $out/bin
-              cp ${./main.py} $out/bin/qkm
-              chmod +x $out/bin/qkm
-            '';
-          });
+          qkmDerivation = ({ pythonEnv, ... }:
+            pkgs.stdenv.mkDerivation {
+              name = "qkm";
+              buildInputs = [
+                pythonEnv
+              ];
+              unpackPhase = "true";
+              installPhase = ''
+                mkdir -p $out/bin
+                cp ${./main.py} $out/bin/qkm
+                chmod +x $out/bin/qkm
+              '';
+            });
         in
         rec {
           packages = {
