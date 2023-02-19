@@ -7,12 +7,13 @@ from evdev.events import KeyEvent
 from evdev.ecodes import EV_KEY
 
 config = sys.argv[1]
-device_index = int(sys.argv[2])
 
 f = open(config, "r")
 fileContents = f.read()
 config = json.loads(fileContents)
-logEvents = "logStuff" in config["debug"]
+
+# When true, we log everything to the console
+logEvents = config["debug"] and "logs" in config["debug"]
 
 
 def log(*args):
@@ -20,9 +21,7 @@ def log(*args):
         print(*args)
 
 
-log(f"Working with device at index {device_index}")
-
-device = evdev.InputDevice(config["inputs"][device_index])
+device = evdev.InputDevice(config["device"])
 
 ec = evdev.ecodes
 blacklisted = []
@@ -32,7 +31,7 @@ def keyCode(name):
     return evdev.ecodes.ecodes[f"KEY_{name.upper()}"]
 
 
-for combo in config["combos"]:
+for combo in config["chords"]:
     combo["from"] = [keyCode(key) for key in combo["from"]]
     combo["to"] = [keyCode(key) for key in combo["to"]]
 
@@ -40,12 +39,14 @@ for combo in config["combos"]:
 def mapChord(chord):
     codes = [keyEvent.event.code for keyEvent in chord]
 
-    for remap in config["combos"]:
+    for remap in config["chords"]:
         if not all(code in codes for code in remap["from"]):
             continue
 
         if len(codes) == len(remap["from"]): # or not remap["exact"]:
             remapped = [key for key in remap["to"]]
+            # TODO: add option for enabling fallthrough!
+            # (this will always be empty at the moment)
             fallthrough = [code for code in codes if code not in remap["from"]]
             return remapped + fallthrough
 
