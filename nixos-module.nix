@@ -57,7 +57,7 @@ let
     };
   };
 
-  # Create a complete KMonad configuration file:
+  # Create a complete Slambda configuration file:
   mkConfig = keyboard:
     let
       config = {
