@@ -1,10 +1,10 @@
 import evdev # for listening to keyboard events
+import asyncio # async stuff
 import sys # for getting commnad line arguments
 import json # for json parsing
 
-from enum import Enum, IntEnum
-from evdev.events import InputEvent, KeyEvent, SynEvent
-from evdev.ecodes import keys, KEY, SYN, REL, ABS, EV_KEY, EV_REL, EV_ABS, EV_SYN, KEY_A, KEY_J, KEY_P
+from evdev.events import KeyEvent
+from evdev.ecodes import EV_KEY
 
 config = sys.argv[1]
 device_index = int(sys.argv[2])
@@ -12,13 +12,13 @@ device_index = int(sys.argv[2])
 f = open(config, "r")
 fileContents = f.read()
 config = json.loads(fileContents)
-
-# List all devices
 logEvents = "logStuff" in config["debug"]
 
-def log(msg):
+
+def log(*args):
     if logEvents:
-        print(msg)
+        print(*args)
+
 
 log(f"Working with device at index {device_index}")
 
@@ -27,12 +27,15 @@ device = evdev.InputDevice(config["inputs"][device_index])
 ec = evdev.ecodes
 blacklisted = []
 
+
 def keyCode(name):
     return evdev.ecodes.ecodes[f"KEY_{name.upper()}"]
+
 
 for combo in config["combos"]:
     combo["from"] = [keyCode(key) for key in combo["from"]]
     combo["to"] = [keyCode(key) for key in combo["to"]]
+
 
 def mapChord(chord):
     codes = [keyEvent.event.code for keyEvent in chord]
@@ -42,19 +45,23 @@ def mapChord(chord):
             continue
 
         if len(codes) == len(remap["from"]): # or not remap["exact"]:
-            return [key for key in remap["to"]] + [code for code in codes if code not in remap["from"]]
+            remapped = [key for key in remap["to"]]
+            fallthrough = [code for code in codes if code not in remap["from"]]
+            return remapped + fallthrough
 
     log("No mapping found")
 
     return None # default to the unsorted chord
 
+
 def msToSeconds(ms):
-    return ms/1000
+    return ms / 1000
+
 
 class DeviceManager:
     delay = msToSeconds(config["delay"]) # in seconds
 
-    def __init__(self, device, ui = None):
+    def __init__(self, device, ui=None):
         self.device = device
         self.taskEndChord = None
         self.currentChord = []
@@ -64,29 +71,39 @@ class DeviceManager:
         if ui is not None:
             self.device.grab()
 
-    def writeUi(self, type, code, value, fallback = None):
+    def writeUi(self, type, code, value, fallback=None):
         log(
-            "OUTPUT",
-            fallback if fallback is not None else f"Type: {type}, Code: {code}, value: {value}", 
-            sep = ": "
+            "OUTPUT: ",
+            fallback if fallback is not None
+            else f"Type: {type}, Code: {code}, value: {value}",
         )
 
-        if self.ui == None: 
+        if self.ui is None:
             return
 
         self.ui.write(type, code, value)
         self.ui.syn()
 
-    def sendEvent(self, event, printEvent = None):
+    def sendEvent(self, event, printEvent=None):
         if isinstance(event, KeyEvent):
-            return self.writeUi(event.event.type, event.event.code, event.event.value, event)
+            return self.writeUi(
+                event.event.type,
+                event.event.code,
+                event.event.value,
+                event
+            )
 
         self.writeUi(event.type, event.code, event.value, event)
 
     def sendKey(self, key, value):
-        _up = "up"
-        _down = "down"
-        self.writeUi(EV_KEY, key, value, f"Key: {evdev.ecodes.keys[key]} {_down if value else _up}")
+        direction = "down" if value else "up"
+
+        self.writeUi(
+            EV_KEY,
+            key,
+            value,
+            f"Key: {evdev.ecodes.keys[key]} {direction}"
+        )
 
     async def handlePressDelay(self, event):
         await asyncio.sleep(DeviceManager.delay)
@@ -95,10 +112,9 @@ class DeviceManager:
         self.taskEndChord = None # hide the evidence :p
 
         chord = self.currentChord
-        sortedChord = sorted(chord, key = lambda e: e.keycode)
         mapped = mapChord(chord)
 
-        if mapped == None: # No remapping found :(
+        if mapped is None: # No remapping found :(
             for event in chord:
                 self.sendEvent(event) # Send the original events through
         else: # Mapping found!
@@ -106,12 +122,12 @@ class DeviceManager:
                 self.sendKey(key, 1)
 
             # Remember the chord for the keyup events
-            combo = dict(keys = [], mappedTo = mapped)
+            combo = dict(keys=[], mappedTo=mapped)
 
             self.pressedCombos.append(combo)
 
             for event in self.currentChord:
-                combo["keys"].append(dict(isPressed = True, event = event))
+                combo["keys"].append(dict(isPressed=True, event=event))
 
         self.currentChord.clear()
 
@@ -124,14 +140,16 @@ class DeviceManager:
 
         categorized = evdev.categorize(event)
 
-        log("INPUT", categorized, sep = ": ")
+        log("INPUT: ", categorized)
 
         if categorized.keystate == KeyEvent.key_down:
             if self.taskEndChord is not None:
                 self.taskEndChord.cancel()
 
             self.currentChord.append(categorized)
-            self.taskEndChord = asyncio.create_task(self.handlePressDelay(categorized))
+            self.taskEndChord = asyncio.create_task(
+                self.handlePressDelay(categorized)
+            )
         elif categorized.keystate == KeyEvent.key_up:
             for combo in self.pressedCombos:
                 keyData = None
@@ -167,16 +185,20 @@ class DeviceManager:
         elif categorized.keystate == KeyEvent.key_hold:
             log("Holding has not yet been implemented!")
 
-    def startLoop(self):
-        for event in device.read_loop():
-            try: 
+    async def startLoop(self):
+        async for event in device.async_read_loop():
+            try:
                 self.handleEvent(event)
             except (Exception, KeyboardInterrupt) as e:
                 print("An error occured: ", e)
 
                 return
 
+
 ui = evdev.UInput(name="My python uinput!")
 
 manager = DeviceManager(device, ui=ui)
-manager.startLoop()
+asyncio.ensure_future(manager.startLoop())
+
+loop = asyncio.get_event_loop()
+loop.run_forever()

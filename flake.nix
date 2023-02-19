@@ -13,8 +13,9 @@
           qkm = pkgs.writers.writePython3Bin "qkm"
             {
               libraries = [ pkgs.python3Packages.evdev ];
+              flakeIgnore = [ "E261" ];
             }
-            (builtins.readFile ./main.py);
+            ./main.py;
         in
         rec {
           packages = {

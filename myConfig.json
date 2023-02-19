@@ -1,12 +1,11 @@
 {
   "name": "yo",
   "inputs": [
-    "name:Keychron Keychron K6",
+    "/dev/input/by-id/usb-Keychron_Keychron_K6-event-kbd",
     "name:My KMonad output",
     "name:AT Translated Set 2 keyboard"
   ],
   "debug": [
-    "listDevices",
     "logStuff"
   ],
   "delay": 25,
