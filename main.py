@@ -198,7 +198,4 @@ class DeviceManager:
 ui = evdev.UInput(name="My python uinput!")
 
 manager = DeviceManager(device, ui=ui)
-asyncio.ensure_future(manager.startLoop())
-
-loop = asyncio.get_event_loop()
-loop.run_forever()
+asyncio.run(manager.startLoop())
