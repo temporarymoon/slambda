@@ -1,6 +1,4 @@
-#!/usr/bin/env python3
 import evdev # for listening to keyboard events
-import asyncio # for async stuff
 import sys # for getting commnad line arguments
 import json # for json parsing
 
@@ -16,34 +14,15 @@ fileContents = f.read()
 config = json.loads(fileContents)
 
 # List all devices
-allDevices = [evdev.InputDevice(path) for path in evdev.list_devices()]
-
-if not isinstance(config["debug"], list):
-    config["debug"] = []
-
 logEvents = "logStuff" in config["debug"]
 
-if "listDevices" in config["debug"]:
-    print("Devices:")
-    for device in allDevices:
-        print(f"{device.path}, {device.name}, {device.phys}")
+def log(msg):
+    if logEvents:
+        print(msg)
 
-def stripPrefix(prefix, path):
-    return path[(len(prefix) + 1):]  if path.startswith(f"{prefix}:") else None
-print(f"Working with device at index {device_index}")
+log(f"Working with device at index {device_index}")
 
-device_path = config["inputs"][device_index]
-inputPath = stripPrefix("path", device_path)
-inputName = stripPrefix("name", device_path) 
-
-devices = []
-
-for device in allDevices:
-    if device.path == inputPath or device.name == inputName:
-        devices.append(device)
-
-print("\nEvents:")
-print(f"Working with {len(devices)} devices")
+device = evdev.InputDevice(config["inputs"][device_index])
 
 ec = evdev.ecodes
 blacklisted = []
@@ -65,7 +44,7 @@ def mapChord(chord):
         if len(codes) == len(remap["from"]): # or not remap["exact"]:
             return [key for key in remap["to"]] + [code for code in codes if code not in remap["from"]]
 
-    print("No mapping found")
+    log("No mapping found")
 
     return None # default to the unsorted chord
 
@@ -73,7 +52,7 @@ def msToSeconds(ms):
     return ms/1000
 
 class DeviceManager:
-    delay = msToSeconds(25) # in seconds
+    delay = msToSeconds(config["delay"]) # in seconds
 
     def __init__(self, device, ui = None):
         self.device = device
@@ -82,16 +61,15 @@ class DeviceManager:
         self.pressedCombos = []
         self.ui = ui
 
-        if ui != None:
+        if ui is not None:
             self.device.grab()
 
     def writeUi(self, type, code, value, fallback = None):
-        if logEvents or self.ui == None: 
-            print(
-                "OUTPUT",
-                fallback if fallback != None else f"Type: {type}, Code: {code}, value: {value}", 
-                sep = ": "
-            )
+        log(
+            "OUTPUT",
+            fallback if fallback is not None else f"Type: {type}, Code: {code}, value: {value}", 
+            sep = ": "
+        )
 
         if self.ui == None: 
             return
@@ -138,20 +116,18 @@ class DeviceManager:
         self.currentChord.clear()
 
     def handleEvent(self, event):
-        if event.type != EV_KEY:
+        if event.type is not EV_KEY:
             return
 
         if event.code in blacklisted:
             return
 
         categorized = evdev.categorize(event)
-        # print(self.device.path, categorized, sep=': ')
 
-        if logEvents:
-            print("INPUT", categorized, sep = ": ")
+        log("INPUT", categorized, sep = ": ")
 
         if categorized.keystate == KeyEvent.key_down:
-            if self.taskEndChord != None:
+            if self.taskEndChord is not None:
                 self.taskEndChord.cancel()
 
             self.currentChord.append(categorized)
@@ -161,11 +137,12 @@ class DeviceManager:
                 keyData = None
                 keys = combo["keys"]
                 for key in keys:
-                    if key["event"].event.code == event.code and key["isPressed"]:
+                    if key["event"].event.code == event.code and \
+                       key["isPressed"]:
                         keyData = key
                         break
 
-                if keyData != None:
+                if keyData is not None:
                     keyData["isPressed"] = False
                     if not any([key["isPressed"] for key in keys]):
                         self.pressedCombos.remove(combo)
@@ -173,14 +150,13 @@ class DeviceManager:
                             self.sendKey(key, 0)
                     break
             else:
-                if self.taskEndChord != None:
+                if self.taskEndChord is not None:
                     keyDownEvent = None
-
                     for key in self.currentChord:
                         if key.event.code == event.code:
                             keyDownEvent = key
 
-                    if keyDownEvent != None:
+                    if keyDownEvent is not None:
                         for key in [x for x in self.currentChord]:
                             self.sendEvent(key)
                             self.currentChord.remove(key)
@@ -189,41 +165,18 @@ class DeviceManager:
 
                 self.sendEvent(categorized)
         elif categorized.keystate == KeyEvent.key_hold:
-            print("Holding has not yet been implemented!")
+            log("Holding has not yet been implemented!")
 
-    async def startLoop(self):
-        async for event in device.async_read_loop():
+    def startLoop(self):
+        for event in device.read_loop():
             try: 
                 self.handleEvent(event)
             except (Exception, KeyboardInterrupt) as e:
                 print("An error occured: ", e)
-                # Handle errors :D
-                if self.loop != None:
-                    loop.stop()
 
                 return
 
-ui = evdev.UInput(name = "My python uinput!")
-loop = asyncio.get_event_loop()
+ui = evdev.UInput(name="My python uinput!")
 
-def custom_exception_handler(loop, context):
-    # first, handle with default handler
-    loop.default_exception_handler(context)
-
-    exception = context.get('exception')
-
-    print(context)
-    loop.stop()
-
-managers = []
-
-for device in devices:
-    manager = DeviceManager(device, ui = ui)
-    manager.loop = loop
-    managers.append(manager)
-
-startLoops = [manager.startLoop() for manager in managers]
-asyncio.ensure_future(asyncio.gather(*startLoops))
-
-loop.set_exception_handler(custom_exception_handler)
-loop.run_forever()
+manager = DeviceManager(device, ui=ui)
+manager.startLoop()

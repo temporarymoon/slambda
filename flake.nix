@@ -10,31 +10,16 @@
       (system:
         let
           pkgs = nixpkgs.legacyPackages.${system};
-          myPythonPackages =
-            (packages: with packages; [
-              evdev
-            ]);
-
-          qkmDerivation = ({ pythonEnv, ... }:
-            pkgs.stdenv.mkDerivation {
-              name = "qkm";
-              buildInputs = [
-                pythonEnv
-              ];
-              unpackPhase = "true";
-              installPhase = ''
-                mkdir -p $out/bin
-                cp ${./main.py} $out/bin/qkm
-                chmod +x $out/bin/qkm
-              '';
-            });
+          qkm = pkgs.writers.writePython3Bin "qkm"
+            {
+              libraries = [ pkgs.python3Packages.evdev ];
+            }
+            (builtins.readFile ./main.py);
         in
         rec {
           packages = {
-            pythonEnv = pkgs.python3.withPackages myPythonPackages;
-            qkm = qkmDerivation { pythonEnv = packages.pythonEnv; };
+            inherit qkm;
           };
           defaultPackage = packages.qkm;
-          devShell = packages.pythonEnv.env;
         });
 }

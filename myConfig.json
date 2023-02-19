@@ -9,6 +9,7 @@
     "listDevices",
     "logStuff"
   ],
+  "delay": 25,
   "combos": [
     {
       "from": [
