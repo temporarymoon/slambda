@@ -41,8 +41,8 @@ let
       chords = lib.mkOption {
         type = with lib.types; listOf (submodule {
           options = {
-            from = mkOption { type = listOf str; };
-            to = mkOption { type = listOf str; };
+            from = lib.mkOption { type = listOf str; };
+            to = lib.mkOption { type = listOf str; };
           };
         });
 
@@ -65,6 +65,7 @@ let
         name = keyboard.name;
         delay = keyboard.delay;
         chords = keyboard.chords;
+        log = true;
       };
     in
     pkgs.writeTextFile {
@@ -90,7 +91,7 @@ let
       cmd = [
         "${cfg.package}/bin/slambda"
       ] ++ cfg.extraArgs ++ [
-        "${mkCfg keyboard}"
+        "${mkConfig keyboard}"
       ];
 
       groups = [

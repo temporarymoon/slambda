@@ -7,12 +7,21 @@
   };
 
   outputs = { self, nixpkgs, flake-utils }:
-    flake-utils.lib.eachSystem
-      (with flake-utils.lib.system; [ x86_64-linux aarch64-linux ])
-      (system:
-        let
-          pkgs = nixpkgs.legacyPackages.${system};
+    let
+      # List of supported systems:
+      supportedSystems = [
+        "x86_64-linux"
+        "aarch64-linux"
+      ];
 
+      forAllSystems = f:
+        nixpkgs.lib.genAttrs supportedSystems (system: f system);
+    in
+    rec {
+      packages = forAllSystems (system:
+        let pkgs = nixpkgs.legacyPackages.${system};
+        in
+        {
           slambda = pkgs.writers.writePython3Bin "slambda"
             {
               libraries = [ pkgs.python3Packages.evdev ];
@@ -21,23 +30,20 @@
               ];
             }
             ./main.py;
-        in
-        rec {
-          packages = {
-            inherit slambda;
-          };
-
-          overlays.default = final: prev: {
-            slambda = self.packages.${prev.system}.default;
-          };
-
-          nixosModules.default = { ... }: {
-            imports = [
-              ./nixos-module.nix
-              { nixpkgs.overlays = [ self.overlays.default ]; }
-            ];
-          };
-
-          defaultPackage = packages.slambda;
         });
+
+      defaultPackage = forAllSystems
+        (system: packages.system.slambda);
+
+      overlays.default = final: prev: {
+        slambda = self.packages.${prev.system}.slambda;
+      };
+
+      nixosModule = { ... }: {
+        imports = [
+          ./nixos-module.nix
+          { nixpkgs.overlays = [ self.overlays.default ]; }
+        ];
+      };
+    };
 }

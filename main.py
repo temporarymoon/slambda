@@ -13,7 +13,7 @@ fileContents = f.read()
 config = json.loads(fileContents)
 
 # When true, we log everything to the console
-logEvents = config["debug"] and "logs" in config["debug"]
+logEvents = config["log"]
 
 
 def log(*args):
