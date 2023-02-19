@@ -190,7 +190,7 @@ class DeviceManager:
         try:
             async for event in device.async_read_loop():
                 self.handleEvent(event)
-        except (Exception, KeyboardInterrupt) as e:
+        except (Exception, KeyboardInterrupt, OSError) as e:
             print("An error occured: ", e)
             return
 
