@@ -33,7 +33,7 @@
         });
 
       defaultPackage = forAllSystems
-        (system: packages.system.slambda);
+        (system: packages.${system}.slambda);
 
       overlays.default = final: prev: {
         slambda = self.packages.${prev.system}.slambda;

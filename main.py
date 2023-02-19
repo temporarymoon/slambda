@@ -187,13 +187,12 @@ class DeviceManager:
             log("Holding has not yet been implemented!")
 
     async def startLoop(self):
-        async for event in device.async_read_loop():
-            try:
+        try:
+            async for event in device.async_read_loop():
                 self.handleEvent(event)
-            except (Exception, KeyboardInterrupt) as e:
-                print("An error occured: ", e)
-
-                return
+        except (Exception, KeyboardInterrupt) as e:
+            print("An error occured: ", e)
+            return
 
 
 ui = evdev.UInput(name="My python uinput!")
