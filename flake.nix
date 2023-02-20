@@ -3,10 +3,9 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/release-21.11";
-    flake-utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = { self, nixpkgs, flake-utils }:
+  outputs = { self, nixpkgs }:
     let
       # List of supported systems:
       supportedSystems = [
