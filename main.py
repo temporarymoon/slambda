@@ -14,6 +14,7 @@ config = json.loads(fileContents)
 
 # When true, we log everything to the console
 logEvents = config["log"]
+name = config["name"]
 
 
 def log(*args):
@@ -195,7 +196,7 @@ class DeviceManager:
             return
 
 
-ui = evdev.UInput(name="My python uinput!")
+ui = evdev.UInput(name=name)
 
 manager = DeviceManager(device, ui=ui)
 asyncio.run(manager.startLoop())
