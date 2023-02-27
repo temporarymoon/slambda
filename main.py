@@ -24,7 +24,6 @@ def log(*args):
 
 device = evdev.InputDevice(config["device"])
 
-ec = evdev.ecodes
 blacklisted = []
 
 
