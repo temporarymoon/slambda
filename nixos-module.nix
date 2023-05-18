@@ -13,6 +13,13 @@ let
         description = "Keyboard name.";
       };
 
+      debug = lib.mkOption {
+        type = lib.types.bool;
+        default = false;
+        example = true;
+        description = "Whether to log stuff for debugging purposes";
+      };
+
       device = lib.mkOption {
         type = lib.types.path;
         example = "/dev/input/by-id/some-dev";
@@ -65,7 +72,7 @@ let
         name = keyboard.name;
         delay = keyboard.delay;
         chords = keyboard.chords;
-        log = true;
+        log = keyboard.debug;
       };
     in
     pkgs.writeTextFile {
