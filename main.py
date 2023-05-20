@@ -195,7 +195,7 @@ class DeviceManager:
             return
 
 
-ui = evdev.UInput(name=f"slambda-{name}")
+ui = evdev.UInput.from_device(device, name=f"slambda-{name}")
 
 manager = DeviceManager(device, ui=ui)
 asyncio.run(manager.startLoop())
